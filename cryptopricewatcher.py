@@ -459,7 +459,6 @@ class App(QtWidgets.QMainWindow):
             data = b
             i = 0
             rowstoadd = []
-            print(data)
             if len(data) == 0:
 
                 rows = model.rowCount()
