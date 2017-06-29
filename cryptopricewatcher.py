@@ -105,14 +105,37 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.lossView)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setContentsMargins(-1, -1, -1, 0)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.exchangelabel = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.exchangelabel.sizePolicy().hasHeightForWidth())
+        self.exchangelabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.exchangelabel.setFont(font)
         self.exchangelabel.setIndent(50)
         self.exchangelabel.setObjectName("exchangelabel")
-        self.verticalLayout_2.addWidget(self.exchangelabel)
+        self.horizontalLayout_3.addWidget(self.exchangelabel)
+        self.sortButton = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sortButton.sizePolicy().hasHeightForWidth())
+        self.sortButton.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.sortButton.setFont(font)
+        self.sortButton.setObjectName("sortButton")
+        self.horizontalLayout_3.addWidget(self.sortButton)
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1211, 23))
@@ -147,6 +170,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Gainers"))
         self.label_2.setText(_translate("MainWindow", "Losers"))
         self.exchangelabel.setText(_translate("MainWindow", "Current Exchange: Poloniex"))
+        self.sortButton.setText(_translate("MainWindow", "Default Sort"))
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
         self.menuExchange.setTitle(_translate("MainWindow", "Exchange"))
         self.actionPoloniex.setText(_translate("MainWindow", "Poloniex"))
@@ -160,6 +184,7 @@ class myTableModel(QtCore.QAbstractTableModel):
         self.headers = []
         self.gainloss = gainloss
         self.selectedticker = ''
+        self.defaultsort = 1
 
     def update(self, dataIn):
         self.datatable = dataIn
@@ -276,13 +301,24 @@ class myTableModel(QtCore.QAbstractTableModel):
             del self.datatable[-1]
         self.endRemoveRows()
     def sort(self, Ncol, order = 0):
+        if self.defaultsort == 1:
+            return
         self.layoutAboutToBeChanged.emit()
-        try:
-            self.datatable = sorted(self.datatable, key = lambda item: float(item[Ncol]))#operator.itemgetter(float(Ncol)))
-            if order == -1:
-                self.datatable.reverse()
-        except:
-            pass
+        if Ncol in (1, 3, 4):
+            try:
+                self.datatable = sorted(self.datatable, key = lambda item: float(item[Ncol][:-1]), reverse=order)
+            except:
+                pass
+        elif Ncol == 2:
+            try:
+                self.datatable = sorted(self.datatable, key = lambda item: float(item[Ncol]), reverse=order)
+            except:
+                pass
+        else:
+            try:
+                self.datatable = sorted(self.datatable, key = lambda item: (item[Ncol]), reverse=order)
+            except:
+                pass
         self.layoutChanged.emit()
     def rowchanged(self, rowindex):
         indextl = self.index(rowindex, 0) #top left
@@ -376,6 +412,7 @@ class App(QtWidgets.QMainWindow):
         self.poloaction.triggered.connect(self.poloactionclicked)
         self.ui.actionExit.triggered.connect(self.exithandler)
         self.exchangelabel = self.ui.exchangelabel
+        self.ui.sortButton.clicked.connect(self.defaultsortclicked)
 
         self.initstuff()
         self.setupgainview()
@@ -409,6 +446,12 @@ class App(QtWidgets.QMainWindow):
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         header.setDefaultAlignment(QtCore.Qt.AlignCenter)
+        header.sectionClicked.connect(self.gainheaderclicked)
+
+    def gainheaderclicked(self, index):
+        self.gainmodel.defaultsort = 0
+
+
 
     def setuplossview(self):
         self.lossview = self.ui.lossView
@@ -424,6 +467,15 @@ class App(QtWidgets.QMainWindow):
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         header.setDefaultAlignment(QtCore.Qt.AlignCenter)
+        header.sectionClicked.connect(self.lossheaderclicked)
+
+    def lossheaderclicked(self, index):
+        self.lossmodel.defaultsort = 0
+
+    def defaultsortclicked(self):
+        self.gainmodel.defaultsort = 1
+        self.lossmodel.defaultsort = 1
+
 
     def trexactionclicked(self):
         self.currentexchange = 1
@@ -483,6 +535,10 @@ class App(QtWidgets.QMainWindow):
                 diff = len(model.datatable) - i
                 if diff > 0:
                     model.removeRows((len(model.datatable)-diff), diff)
+        h = self.gainview.horizontalHeader()
+        self.gainmodel.sort(h.sortIndicatorSection(),h.sortIndicatorOrder())
+        h = self.lossview.horizontalHeader()
+        self.lossmodel.sort(h.sortIndicatorSection(),h.sortIndicatorOrder())
 
     def exithandler(self):
         self.polothread.kill = 1
