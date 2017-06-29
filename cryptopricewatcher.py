@@ -402,12 +402,12 @@ class App(QtWidgets.QMainWindow):
         self.gainmodel.update([(" ", " ", " ", " ", ' ', " ")])
         self.gainview.setModel(self.gainmodel)
         header = self.gainview.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         header.setDefaultAlignment(QtCore.Qt.AlignCenter)
 
     def setuplossview(self):
@@ -417,12 +417,12 @@ class App(QtWidgets.QMainWindow):
         self.lossmodel.update([(" ", " ", " ", " ", ' ', " ")])
         self.lossview.setModel(self.lossmodel)
         header = self.lossview.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         header.setDefaultAlignment(QtCore.Qt.AlignCenter)
 
     def trexactionclicked(self):
