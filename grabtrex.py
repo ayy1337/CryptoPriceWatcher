@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 '''     
-        Version: 1.0
+        Version: 1.0.01
         Author: ayy1337
         Licence: GNU GPL v3.0
 '''
@@ -50,13 +50,19 @@ class coin:
 	def addminute(self,ticker, timestamp):
 		i = ticker
 		t = i['MarketName']
-		price = float(i['Last'])
-		prevday = float(i['PrevDay'])
+		try:
+			price = float(i['Last'])
+			prevday = float(i['PrevDay'])
+			volume = float(i['BaseVolume'])
+		except:
+			price = 0
+			prevday = 0
+			volume = 0
 		try:
 			change = (price/prevday) -1
 		except:
 			change = 0
-		volume = float(i['BaseVolume'])
+		
 		self.minutes.append(minute(t,price,change,timestamp,volume, prevday)) #ticker, price, change, volume, timestamp
 
 	def updateminute(self,ticker,timestamp):
@@ -64,7 +70,10 @@ class coin:
 		if (timestamp - currmin.timestamp) > 60:
 			self.addminute(ticker,timestamp)
 		else:
-			last = float(ticker['Last'])
+			try:
+				last = float(ticker['Last'])
+			except:
+				last = 0
 			currmin.close = last
 			a = (currmin.average * currmin.numprices) + last
 			currmin.numprices += 1
@@ -192,4 +201,4 @@ if __name__ == "__main__":
 	a = updater()
 	while 1:
 		a.update()
-		time.sleep(2) 
+		time.sleep(2)
