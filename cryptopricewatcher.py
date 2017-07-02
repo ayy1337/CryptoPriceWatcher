@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 '''     Crypto Price Watcher
-        Version: 1.0
+        Version: 1.0.01
         Author: ayy1337
         Licence: GNU GPL v3.0
 '''
@@ -502,10 +502,13 @@ class App(QtWidgets.QMainWindow):
 
 
     def updateview(self):
-        if self.currentexchange == 0:
-            gain,loss = self.poloticks
-        elif self.currentexchange == 1:
-            gain,loss = self.trexticks
+        try:
+            if self.currentexchange == 0:
+                gain,loss = self.poloticks
+            elif self.currentexchange == 1:
+                gain,loss = self.trexticks
+        except:
+            return
         for (a,b) in [(self.gainmodel, gain),(self.lossmodel, loss)]:
             model = a
             data = b
