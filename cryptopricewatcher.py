@@ -519,41 +519,44 @@ class App(QtWidgets.QMainWindow):
             pass
 
     def updatemktavglabel(self):
-        lbl = self.mktavglabel
-        if self.currentexchange == 0:
-            coins = self.poloupdater.coins
-            seperator = '_'
-        else:
-            coins = self.trexupdater.coins
-            seperator = '-'
-        t1 = t2 = t3 = n1 = n2 = n3 = 0
-        for item in coins:
-            try:
-                splt = item.split(seperator)
-                if splt[0] != "BTC":
-                    continue
-                co = coins[item]
-                pricenow = co.minutes[-1].close
-                lenmins = len(co.minutes)
-                fm = co.minutes[-1*min(6,lenmins)].close
-                tm = co.minutes[-1*min(30,lenmins)].close
-                fmc = (pricenow/fm) -1
-                tmc = (pricenow/tm) -1
-                dc = co.minutes[-1].change
-                print(item,fmc,tmc,dc)
-                #return
-                if (fmc >= -.9) and (fmc <= 7):
-                    t1 += fmc; n1 += 1
-                if (tmc >= -.9) and (tmc <= 7):
-                    t2 += tmc; n2+=1
-                if (dc >= -.9) and (dc <= 7):
-                    t3 += dc; n3 += 1
-            except:
-                pass
-        a1 = (t1/n1)*100
-        a2 = (t2/n2)*100
-        a3 = (t3/n3)*100
-        lbl.setText("Market avg: {:.2f}% / {:.2f}% / {:.2f}%".format(a1,a2,a3))
+        try:
+            lbl = self.mktavglabel
+            if self.currentexchange == 0:
+                coins = self.poloupdater.coins
+                seperator = '_'
+            else:
+                coins = self.trexupdater.coins
+                seperator = '-'
+            t1 = t2 = t3 = n1 = n2 = n3 = 0
+            for item in coins:
+                try:
+                    splt = item.split(seperator)
+                    if splt[0] != "BTC":
+                        continue
+                    co = coins[item]
+                    pricenow = co.minutes[-1].close
+                    lenmins = len(co.minutes)
+                    fm = co.minutes[-1*min(6,lenmins)].close
+                    tm = co.minutes[-1*min(30,lenmins)].close
+                    fmc = (pricenow/fm) -1
+                    tmc = (pricenow/tm) -1
+                    dc = co.minutes[-1].change
+                    print(item,fmc,tmc,dc)
+                    #return
+                    if (fmc >= -.9) and (fmc <= 7):
+                        t1 += fmc; n1 += 1
+                    if (tmc >= -.9) and (tmc <= 7):
+                        t2 += tmc; n2+=1
+                    if (dc >= -.9) and (dc <= 7):
+                        t3 += dc; n3 += 1
+                except:
+                    pass
+            a1 = (t1/n1)*100
+            a2 = (t2/n2)*100
+            a3 = (t3/n3)*100
+            lbl.setText("Market avg: {:.2f}% / {:.2f}% / {:.2f}%".format(a1,a2,a3))
+        except:
+            return
 
 
     def updateview(self):
