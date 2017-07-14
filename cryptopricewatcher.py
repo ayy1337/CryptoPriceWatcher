@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 '''     Crypto Price Watcher
-        Version: 1.0.01
+        Version: 1.0.02
         Author: ayy1337
         Licence: GNU GPL v3.0
 '''
@@ -121,6 +121,19 @@ class Ui_MainWindow(object):
         self.exchangelabel.setIndent(50)
         self.exchangelabel.setObjectName("exchangelabel")
         self.horizontalLayout_3.addWidget(self.exchangelabel)
+        self.mktavglabel = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mktavglabel.sizePolicy().hasHeightForWidth())
+        self.mktavglabel.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.mktavglabel.setFont(font)
+        self.mktavglabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.mktavglabel.setObjectName("mktavglabel")
+        self.horizontalLayout_3.addWidget(self.mktavglabel)
         self.sortButton = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -135,10 +148,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.sortButton)
         self.horizontalLayout_3.setStretch(0, 1)
         self.horizontalLayout_3.setStretch(1, 1)
+        self.horizontalLayout_3.setStretch(2, 1)
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1211, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1211, 21))
         self.menubar.setObjectName("menubar")
         self.menuMenu = QtWidgets.QMenu(self.menubar)
         self.menuMenu.setObjectName("menuMenu")
@@ -170,6 +184,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Gainers"))
         self.label_2.setText(_translate("MainWindow", "Losers"))
         self.exchangelabel.setText(_translate("MainWindow", "Current Exchange: Poloniex"))
+        self.mktavglabel.setText(_translate("MainWindow", "Market avg: -% / -% / -%"))
         self.sortButton.setText(_translate("MainWindow", "Default Sort"))
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
         self.menuExchange.setTitle(_translate("MainWindow", "Exchange"))
@@ -413,6 +428,8 @@ class App(QtWidgets.QMainWindow):
         self.ui.actionExit.triggered.connect(self.exithandler)
         self.exchangelabel = self.ui.exchangelabel
         self.ui.sortButton.clicked.connect(self.defaultsortclicked)
+        self.mktavglabel = self.ui.mktavglabel
+
 
         self.initstuff()
         self.setupgainview()
@@ -497,8 +514,46 @@ class App(QtWidgets.QMainWindow):
         try:
             a = QtCore.QTimer(self)
             a.singleShot(10, self.updateview)
+            a.singleShot(20, self.updatemktavglabel)
         except:
             pass
+
+    def updatemktavglabel(self):
+        lbl = self.mktavglabel
+        if self.currentexchange == 0:
+            coins = self.poloupdater.coins
+            seperator = '_'
+        else:
+            coins = self.trexupdater.coins
+            seperator = '-'
+        t1 = t2 = t3 = n1 = n2 = n3 = 0
+        for item in coins:
+            try:
+                splt = item.split(seperator)
+                if splt[0] != "BTC":
+                    continue
+                co = coins[item]
+                pricenow = co.minutes[-1].close
+                lenmins = len(co.minutes)
+                fm = co.minutes[-1*min(6,lenmins)].close
+                tm = co.minutes[-1*min(30,lenmins)].close
+                fmc = (pricenow/fm) -1
+                tmc = (pricenow/tm) -1
+                dc = co.minutes[-1].change
+                print(item,fmc,tmc,dc)
+                #return
+                if (fmc >= -.9) and (fmc <= 7):
+                    t1 += fmc; n1 += 1
+                if (tmc >= -.9) and (tmc <= 7):
+                    t2 += tmc; n2+=1
+                if (dc >= -.9) and (dc <= 7):
+                    t3 += dc; n3 += 1
+            except:
+                pass
+        a1 = (t1/n1)*100
+        a2 = (t2/n2)*100
+        a3 = (t3/n3)*100
+        lbl.setText("Market avg: {:.2f}% / {:.2f}% / {:.2f}%".format(a1,a2,a3))
 
 
     def updateview(self):
