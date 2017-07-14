@@ -541,8 +541,6 @@ class App(QtWidgets.QMainWindow):
                     fmc = (pricenow/fm) -1
                     tmc = (pricenow/tm) -1
                     dc = co.minutes[-1].change
-                    print(item,fmc,tmc,dc)
-                    #return
                     if (fmc >= -.9) and (fmc <= 7):
                         t1 += fmc; n1 += 1
                     if (tmc >= -.9) and (tmc <= 7):
