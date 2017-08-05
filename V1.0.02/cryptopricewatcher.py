@@ -21,6 +21,7 @@ try:
 except:
     try:
         from gi.repository import Notify
+        Notify.init("CPW")
     except:
         notificationsavailable = 0
 soundavailable = 1

@@ -14,9 +14,6 @@ from operator import attrgetter
 from operator import itemgetter
 import shelve
 from trexapi import Bittrex
-from poloapi import Poloniex
-from playsound import playsound
-from gi.repository import Notify
 
 condperc = .01
 mins = 5
@@ -93,7 +90,6 @@ class updater:
 
 	def __init__(self):
 		self.coins = {}
-		Notify.init("CPW")
 		try:
 			d = shelve.open(databasepath)
 			self.coins = d["trexcoins"]
@@ -101,8 +97,6 @@ class updater:
 		except:
 			pass
 		self.bittrex = Bittrex("","")
-		self.polo = Poloniex()
-		self.soundlastplayed = self.lastcheckstatus = int(time.time())
 		self.pcstatus = None
 
 
