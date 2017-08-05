@@ -112,7 +112,7 @@ class updater:
 		timestamp = int(time.time())
 
 		try:
-		self.coins = self.updatecoins(self.coins)			
+			self.coins = self.updatecoins(self.coins)			
 		except:
 			return 1
 
