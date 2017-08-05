@@ -969,15 +969,18 @@ class App(QtWidgets.QMainWindow):
         self.favModel.defaultsort = 0
 
     def favViewClicked(self, index):
-        i = index.row()
-        coinname = index.model().datatable[i][0].split('(')
-        if len(coinname) > 1:
-            if coinname[1][0] == 'p':
-                coinname = "BTC_" + coinname[0]
-            else:
-                coinname = "BTC-" + coinname[0]
-            self.favourites.remove(coinname)
-            self.savefavs()
+        try:
+            i = index.row()
+            coinname = index.model().datatable[i][0].split('(')
+            if len(coinname) > 1:
+                if coinname[1][0] == 'p':
+                    coinname = "BTC_" + coinname[0]
+                else:
+                    coinname = "BTC-" + coinname[0]
+                self.favourites.remove(coinname)
+                self.savefavs()
+        except:
+            pass
 
     def savefavs(self):
         try:
@@ -1023,19 +1026,22 @@ class App(QtWidgets.QMainWindow):
             self.alertids.append(item['id'])
     
     def alertsViewClicked(self, point):
-        row = self.alertsView.rowAt(point.y())
-        mdi = self.alertsModel.datatable[row][0]
-        rowid = mdi.id
-        if mdi.disabled:
-            mdi.disabled = 0
-            mdi.background = None
-            mdi.alert['disabled'] = 0
+        try:
+            row = self.alertsView.rowAt(point.y())
+            mdi = self.alertsModel.datatable[row][0]
+            rowid = mdi.id
+            if mdi.disabled:
+                mdi.disabled = 0
+                mdi.background = None
+                mdi.alert['disabled'] = 0
 
-        else:
-            mdi.disabled = 1
-            mdi.background = self.disabledbrush
-            mdi.alert['disabled'] = 1
-        self.alertsModel.cellchanged(row,0)
+            else:
+                mdi.disabled = 1
+                mdi.background = self.disabledbrush
+                mdi.alert['disabled'] = 1
+            self.alertsModel.cellchanged(row,0)
+        except:
+            pass
 
     def alertsViewDblClicked(self, index):
         if QtWidgets.QApplication.mouseButtons() & QtCore.Qt.RightButton:
