@@ -31,12 +31,12 @@ except:
     soundavailable = 0
 
 class alertmodelitem():
-    def __init__(self, data, idnum, alert, background = None):
+    def __init__(self, data, idnum, alert, background = None, disabled = None):
         self.data = data
         self.id = idnum
         self.alert = alert
         self.background = background
-        self.disabled = 0
+        self.disabled = 0 if disabled == None else disabled
 
 
 class myTableModel(QtCore.QAbstractTableModel):
@@ -1015,7 +1015,9 @@ class App(QtWidgets.QMainWindow):
             d.close()
             for item in self.alerts:
                 string = self.alertstring(item)
-                modelitem = alertmodelitem(string, item['id'], item)
+                modelitem = alertmodelitem(string, item['id'], item, disabled=item['disabled'])
+                if modelitem.disabled:
+                    modelitem.background = self.disabledbrush
                 self.alertsModel.appendRow([modelitem])
         except:
             self.alerts = []
@@ -1039,7 +1041,16 @@ class App(QtWidgets.QMainWindow):
                 mdi.disabled = 1
                 mdi.background = self.disabledbrush
                 mdi.alert['disabled'] = 1
+                al = mdi.alert
+                try:
+                    self.triggeredsincelastview.remove(al)
+                    self.dnalerts.remove(al)
+                except:
+                    pass
             self.alertsModel.cellchanged(row,0)
+            d = shelve.open(self.databasepath)
+            d['alerts'] = self.alerts
+            d.close()
         except:
             pass
 
