@@ -1039,7 +1039,6 @@ class App(QtWidgets.QMainWindow):
 
     def alertsViewDblClicked(self, index):
         if QtWidgets.QApplication.mouseButtons() & QtCore.Qt.RightButton:
-            print('rclick received')
             return
         try:
             i = index.row()
@@ -1085,7 +1084,6 @@ class App(QtWidgets.QMainWindow):
                 try:
                     price = float(price)
                 except:
-                    print("couldn't float the price")
                     return
                 success = False
                 while not success:
@@ -1407,7 +1405,6 @@ class App(QtWidgets.QMainWindow):
             if ticker == None:
                 coinname = self.newfavLE.text().upper()
                 cb = self.favexchCombo
-                print(cb.currentText(), cb.currentIndex())
                 if self.favexchCombo.currentIndex() == 0:
                     ticker = "BTC_" + coinname
                     coins = self.poloupdater.coins
