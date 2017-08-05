@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 '''     
-        Version: 1.0
+        Version: 1.0.02
         Author: ayy1337
         Licence: GNU GPL v3.0
 '''
@@ -78,7 +78,9 @@ def checkcond(coins):
 		largestloss = 0
 		periodchange = 0
 		lowvol = ""
-		suffix = mins[0].ticker.split('_')[0]
+		splt = key.split('_')
+		suffix = splt[0]
+		coinname = splt[1]
 		if suffix != "BTC":
 			continue
 		if 100 < mins[-1].volume < 500:
@@ -92,7 +94,7 @@ def checkcond(coins):
 			else:
 				break
 		for i in range(1,len(tmp)+1): 
-			for n in range(i, len(tmp)+1):
+			for n in range(i+1, len(tmp)+1):
 				root = tmp[-i]
 				end = tmp[-n]
 				changeup = (end.high - root.low) / root.low
@@ -106,9 +108,9 @@ def checkcond(coins):
 		else:
 			continue
 		if (largestgain >= condperc) or (periodchange > 2):			
-			gainers.append([mins[0].ticker,largestgain*100,mins[-1].close,suffix, periodchange, int(mins[-1].change * 100), lowvol])
+			gainers.append([coinname,largestgain*100,mins[-1].close,suffix, periodchange, int(mins[-1].change * 100), lowvol])
 		if ((largestloss*-1) >= condperc) or (periodchange < -2):
-			losers.append([mins[0].ticker, largestloss * 100, mins[-1].close, suffix, periodchange, int(mins[-1].change * 100), lowvol])
+			losers.append([coinname, largestloss * 100, mins[-1].close, suffix, periodchange, int(mins[-1].change * 100), lowvol])
 
 	return gainers, losers
 
@@ -131,7 +133,6 @@ class updater:
 		try:
 			self.grabtickers()
 		except:
-			print('error')
 			return 1
 		gainers, losers = checkcond(self.coins)
 		d = shelve.open(databasepath)
@@ -151,6 +152,29 @@ class updater:
 				self.coins[item].updateminute(tickers[item],timestamp)
 			else:
 				self.coins[item].addminute(tickers[item], timestamp)
+
+	def getfav(self, ticker):
+		splt = ticker.split('_')
+		c = self.coins[ticker]
+		mins = c.minutes
+		oldprice = mins[-(min(len(mins),5))].open
+		currprice = mins[-1].close
+		fiveminchange = ((currprice/oldprice)-1) * 100 
+		oldprice = mins[-(min(len(mins),30))].open
+		thirtyminchange = ((currprice/oldprice)-1)*100
+		price = currprice
+		volume = mins[-1].volume
+		if volume > 500:
+			v = ' '
+		elif volume >100:
+			v = 'l'
+		else:
+			v = 'v'
+		tfhourchange = mins[-1].change * 100
+		return [splt[1]+'(p)', fiveminchange, price, thirtyminchange, tfhourchange, v]
+
+	def getlast(self, ticker):
+		return self.coins[ticker].minutes[-1].close
 
 if __name__ == "__main__":
 	updater = updater()

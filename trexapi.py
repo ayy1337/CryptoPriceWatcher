@@ -51,6 +51,16 @@ class Bittrex(object):
             options = {}
         nonce = str(int(time.time() * 1000))
         method_set = 'public'
+        #https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=BTC-LTC&tickInterval=thirtyMin
+        if method == "GetTicks":
+            url = "https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=" + options["marketName"] + "&tickInterval=" + options["tickInterval"]
+            request_url = url# + urlencode(options)
+            #print(request_url)
+            
+            return requests.get(
+                request_url#,
+                #headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(), hashlib.sha512).hexdigest()}
+            ).json()
 
         if method in MARKET_SET:
             method_set = 'market'
@@ -68,6 +78,15 @@ class Bittrex(object):
             request_url,
             headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(), hashlib.sha512).hexdigest()}
         ).json()
+
+    def get_ticks(self, market, interval="thirtyMin"):
+        """
+        Used to get chart tick data for given interval.
+
+        :return: Chart tick data in JSON
+        :rtype : dict
+        """
+        return self.api_query("GetTicks", {"marketName":market, "tickInterval":interval})
 
     def get_markets(self):
         """

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 '''     
-        Version: 1.0.01
+        Version: 1.0.02
         Author: ayy1337
         Licence: GNU GPL v3.0
 '''
@@ -26,10 +26,6 @@ if os.name in ['posix','linux']:
 	databasepath = cwd + "/db"
 else:
 	databasepath = cwd + "\\db"
-
-
-
-
 
 class minute:
 	def __init__(self, ticker, o, change, timestamp, volume, prevday):
@@ -70,6 +66,8 @@ class coin:
 		if (timestamp - currmin.timestamp) > 60:
 			self.addminute(ticker,timestamp)
 		else:
+			if ticker['Last'] == None:
+				print("New market added: {}".format(ticker["MarketName"]))
 			try:
 				last = float(ticker['Last'])
 			except:
@@ -99,15 +97,17 @@ class updater:
 		except:
 			pass
 		self.bittrex = Bittrex("","")
+		self.pcstatus = None
+
 
 
 	def update(self):
 		global timestamp
 		timestamp = int(time.time())
+
 		try:
 			self.coins = self.updatecoins(self.coins)			
 		except:
-			print('error')
 			return 1
 
 		gainers, losers = self.checkcond(self.coins)
@@ -130,13 +130,15 @@ class updater:
 			return
 		timestamp = int(time.time())
 		for item in tickers:
+
 			t = item['MarketName']
+
 			if item['MarketName'] not in coins:
 				coins[item['MarketName']] = coin(item['MarketName'])
-			if len(self.coins[t].minutes) > 0:
-				self.coins[t].updateminute(item,timestamp)
+			if len(coins[t].minutes) > 0:
+				coins[t].updateminute(item,timestamp)
 			else:
-				self.coins[t].addminute(item, timestamp)
+				coins[t].addminute(item, timestamp)
 		return coins
 
 	def checkcond(self, coins):
@@ -149,11 +151,15 @@ class updater:
 			tmp = []
 			endtime = mins[-1].timestamp
 
+
 			largestgain = 0
 			largestloss = 0
 			periodchange = 0
 			lowvol = ""
-			suffix = coin.minutes[0].ticker.split('-')[0]
+			splt = key.split('-')
+			suffix = splt[0]
+			coinname = splt [1]
+
 			if suffix != "BTC":
 				continue
 			if 100 < mins[-1].volume < 500:
@@ -167,7 +173,7 @@ class updater:
 				else:
 					break
 			for i in range(1,len(tmp)+1): 
-				for n in range(i, len(tmp)+1):
+				for n in range(i+1, len(tmp)+1):
 					root = tmp[-i]
 					end = tmp[-n]
 					try:
@@ -190,14 +196,39 @@ class updater:
 					periodchange = 0
 			else:
 				continue
+
 			if (largestgain >= condperc) or (periodchange > 2):			
-				gainers.append([mins[0].ticker,largestgain*100,mins[-1].close,suffix, periodchange, int(mins[-1].change * 100), lowvol])
+				gainers.append([coinname,largestgain*100,mins[-1].close,suffix, periodchange, int(mins[-1].change * 100), lowvol])
 			if ((largestloss*-1) >= condperc) or (periodchange < -2):
-				losers.append([mins[0].ticker, largestloss * 100, mins[-1].close, suffix, periodchange, int(mins[-1].change * 100), lowvol])
+				losers.append([coinname, largestloss * 100, mins[-1].close, suffix, periodchange, int(mins[-1].change * 100), lowvol])
 
 		return gainers, losers
 
+	def getfav(self, ticker):
+		splt = ticker.split('-')
+		c = self.coins[ticker]
+		mins = c.minutes
+		oldprice = mins[-(min(len(mins),5))].open
+		currprice = mins[-1].close
+		fiveminchange = ((currprice/oldprice)-1) * 100 
+		oldprice = mins[-(min(len(mins),30))].open
+		thirtyminchange = ((currprice/oldprice)-1)*100
+		price = currprice
+		volume = mins[-1].volume
+		if volume > 500:
+			v = ' '
+		elif volume >100:
+			v = 'l'
+		else:
+			v = 'v'
+		tfhourchange = mins[-1].change * 100
+		return [splt[1]+'(b)', fiveminchange, price, thirtyminchange, tfhourchange, v]
+
+	def getlast(self, ticker):
+		return self.coins[ticker].minutes[-1].close
+
 if __name__ == "__main__":
+
 	a = updater()
 	while 1:
 		a.update()
