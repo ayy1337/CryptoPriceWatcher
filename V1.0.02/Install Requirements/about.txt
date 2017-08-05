@@ -1,0 +1,7 @@
+The file included here is a small python script that will install
+	all the required python modules for Crypto Price Watcher to work.
+
+May need to run as administrator/root depending on your system config.
+
+If you do please ensure you read the script first because you should 
+	know what you're running when doing it with admin privileges.
