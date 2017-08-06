@@ -14,6 +14,8 @@ How to get it running, for windows:
 
 https://steemit.com/cryptocurrency/@squaremining/crypto-price-watcher-and-how-to-install-it
 
+(or just run installreqs script)
+
 
 Donations:
 
